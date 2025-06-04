@@ -101,12 +101,12 @@ Efficiency Gains:
 
 **Implementation Timeline**
 
-Week 1-2: Requirements gathering and system design
-Week 3-4: Snowflake setup and data migration
-Week 5-6: Python automation and data processing
-Week 7-8: SQL analysis and business logic implementation
-Week 9-10: Power BI dashboard development
-Week 11-12: Testing, optimization, and deployment
+- Week 1-2: Requirements gathering and system design
+- Week 3-4: Snowflake setup and data migration
+- Week 5-6: Python automation and data processing
+- Week 7-8: SQL analysis and business logic implementation
+- Week 9-10: Power BI dashboard development
+- Week 11-12: Testing, optimization, and deployment
 
 **Project Deliverables**
 
