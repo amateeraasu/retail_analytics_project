@@ -1,13 +1,5 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 pip install Faker
 
-
-# In[2]:
 
 
 import pandas as pd
@@ -18,26 +10,20 @@ from datetime import datetime, timedelta
 import pytz
 
 
-# In[3]:
+# Initializing Faker for realistic data
 
-
-# Initialize Faker for realistic data
 fake = Faker()
 
+# Setting Date Range of 3-5 years.
 
-# In[4]:
 
-
-# --- Configuration ---
 NUM_STORES = 3
 # Generate data for 3 to 5 years leading up to the current date (May 31, 2025)
 END_DATE = datetime(2025, 5, 31)
 START_DATE = END_DATE - timedelta(days=random.randint(3 * 365, 5 * 365))
 DATE_RANGE_DAYS = (END_DATE - START_DATE).days
 
-
-# In[5]:
-
+# Giving Random Store names and Store Locations
 
 STORE_LOCATIONS = {
     "Store_001": {"name": "The Grand Bakery - San Francisco", "city": "San Francisco", "state": "CA", "country": "United States", "country_code": "US", "timezone": "America/Los_Angeles"},
@@ -46,34 +32,29 @@ STORE_LOCATIONS = {
 }
 
 
-# In[6]:
+# Creating Funcions for Data Timeline
 
 
-# --- Helper Functions ---
 def random_date(start, end):
     return start + timedelta(days=random.randint(0, (end - start).days))
 
 
-# In[7]:
+# Choosing specific Time Range because stores operate strictly from 11 AM to 10 PM (22:00) local time
 
-
-# UPDATED: Stores operate strictly from 11 AM to 10 PM (22:00) local time
 def random_datetime_in_day(date_obj, timezone_str):
     tz = pytz.timezone(timezone_str)
     
-    # Generate a random hour between 11 AM and 9 PM (21) to ensure delivery before 10 PM (22)
-    # This gives a buffer for order processing and delivery within operating hours.
+    # Generating a random hour between 11 AM and 9 PM (21) to ensure delivery before 10 PM (22)
+
     hour = random.randint(11, 21) 
     minute = random.randint(0, 59)
     second = random.randint(0, 59)
 
     local_dt = tz.localize(datetime(date_obj.year, date_obj.month, date_obj.day,
                                     hour, minute, second))
-    return local_dt.astimezone(pytz.utc) # Store in UTC for consistency
+    return local_dt.astimezone(pytz.utc) 
 
-
-# In[8]:
-
+# Setting Randon Time for Features like "Merchant_Accepted_Time", "delivery_time", "prep_time", etc
 
 def generate_time_sequence(order_utc_time):
     # All times in UTC
@@ -115,10 +96,8 @@ def generate_time_sequence(order_utc_time):
     }
 
 
-# In[9]:
+#  Generating Random Data for One the Stores Selling Platforms - Snackpass
 
-
-# --- Snackpass Data Generation ---
 def generate_snackpass_data(store_id, store_name, start_date, end_date):
     print(f"Generating Snackpass data for {store_name}...")
     customer_data = []
@@ -127,11 +106,9 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
 
     # Snackpass - Items Dataset (Initial list for aggregation)
     items = [
-        {"Item": "Strawberry Banana Nutella(GF)", "Category": "Sweet Crêpes", "BasePrice": 10.50},
-        {"Item": "Strawberry Nutella(GF)", "Category": "Sweet Crêpes", "BasePrice": 9.99},
-        {"Item": "Wild Berries", "Category": "Sweet Crêpes", "BasePrice": 10.25},
-        {"Item": "(New) Oreo Toasted Marshmallow", "Category": "Sweet Crêpes", "BasePrice": 11.00},
-        {"Item": "Matcha Chocolate Truffles", "Category": "Sweet Crêpes", "BasePrice": 10.15},
+        {"Item": "Strawberry Banana Nutella Crepe", "Category": "Sweet Crêpes", "BasePrice": 10.50},
+        {"Item": "Strawberry Nutella Crepe", "Category": "Sweet Crêpes", "BasePrice": 9.99},
+        {"Item": "Berries Crepe", "Category": "Sweet Crêpes", "BasePrice": 10.25},
         {"Item": "Turkey & Swiss Savory Crêpe", "Category": "Savory Crêpes", "BasePrice": 12.50},
         {"Item": "Ham & Cheddar Savory Crêpe", "Category": "Savory Crêpes", "BasePrice": 11.99},
         {"Item": "Spinach & Feta Savory Crêpe", "Category": "Savory Crêpes", "BasePrice": 11.75},
@@ -147,7 +124,9 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
     item_order_counts = {item['Item']: 0 for item in items}
     item_net_sales_agg = {item['Item']: 0.0 for item in items}
 
-    # Generate daily sales
+    
+    # Generating daily sales
+    
     current_date = start_date
     while current_date <= end_date:
         orders_today = random.randint(50, 200) # Base daily orders
@@ -182,7 +161,9 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
         gift_card_redemption = round(net_sales * random.uniform(0.0, 0.1), 2)
         store_credit_redemption = round(net_sales * random.uniform(0.0, 0.05), 2)
         
-        # Ensure total payment methods don't exceed net sales; remaining goes to 'other' (card payments typically)
+        # Ensuring total payment methods don't exceed net sales or gross sales
+
+        
         paid_sum = cash + gift_card_redemption + store_credit_redemption
         if paid_sum > net_sales:
             diff = paid_sum - net_sales
@@ -228,7 +209,11 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
         })
         current_date += timedelta(days=1)
 
-    # Snackpass - Items Dataset (Finalized from aggregations)
+
+    
+
+    # Snackpass - Items Dataset (Finalizing aggregations)
+    
     for item in items:
         items_data.append({
             "Item": item['Item'],
@@ -236,6 +221,7 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
             "Orders": item_order_counts[item['Item']],
             "Net Sales": f"${item_net_sales_agg[item['Item']]:.2f}"
         })
+        
 
     # Snackpass - Customer Dataset (Generate after sales to get realistic spend)
     num_customers = random.randint(1000, 3000) # Number of unique customers per store
@@ -277,7 +263,9 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
             "Gift CardBalance": f"${gift_card_balance:.2f}" if gift_card_balance > 0 else None
         })
 
-    # Convert to DataFrame to assign Lifetime Rank
+    # Converting to DataFrame to assign Lifetime Rank
+
+    
     df_customers = pd.DataFrame(customer_data)
     # Convert 'Lifetime Spent' to numeric for sorting
     df_customers['Lifetime Spent_numeric'] = df_customers['Lifetime Spent'].replace({'\$': ''}, regex=True).astype(float)
@@ -285,17 +273,16 @@ def generate_snackpass_data(store_id, store_name, start_date, end_date):
     df_customers['Lifetime Rank'] = df_customers.index + 1
     df_customers = df_customers.drop(columns=['Lifetime Spent_numeric'])
 
-    # Save to CSV
+    # Saving to CSV
     df_customers.to_csv(f"snackpass_customers_{store_id}.csv", index=False)
     pd.DataFrame(items_data).to_csv(f"snackpass_items_{store_id}.csv", index=False)
     pd.DataFrame(sales_data).to_csv(f"snackpass_sales_{store_id}.csv", index=False)
     print(f"Finished Snackpass data for {store_name}.")
 
 
-# In[10]:
+# Generating Random Data for One the Stores Selling Platforms - UberEats
 
 
-# --- Uber Eats Data Generation ---
 def generate_uber_eats_data(store_id, store_info, start_date, end_date):
     print(f"Generating Uber Eats data for {store_info['name']}...")
     store_info_data = []
@@ -485,17 +472,16 @@ def generate_uber_eats_data(store_id, store_info, start_date, end_date):
             order_id_counter += 1
         current_date_for_orders += timedelta(days=1)
 
-    # Save to CSV
+    # Saving to CSV
     pd.DataFrame(store_info_data).to_csv(f"ubereats_store_info_{store_id}.csv", index=False)
     pd.DataFrame(order_history_data).to_csv(f"ubereats_order_history_{store_id}.csv", index=False)
     pd.DataFrame(payments_details_data).to_csv(f"ubereats_payments_details_{store_id}.csv", index=False)
     print(f"Finished Uber Eats data for {store_info['name']}.")
 
 
-# In[11]:
+# Generating Random Data for One the Stores Selling Platforms - Doordash
 
 
-# --- DoorDash Data Generation ---
 def generate_doordash_data(store_id, store_info, start_date, end_date):
     print(f"Generating DoorDash data for {store_info['name']}...")
     financial_details_data = []
@@ -505,6 +491,7 @@ def generate_doordash_data(store_id, store_info, start_date, end_date):
     tz_utc = pytz.utc
 
     # DoorDash - Financial Details
+    
     doordash_order_id_counter = 1
     current_date_for_transactions = start_date
     while current_date_for_transactions <= end_date:
@@ -603,6 +590,7 @@ def generate_doordash_data(store_id, store_info, start_date, end_date):
 
 
     # DoorDash - Payout Summary (Weekly aggregation)
+    
     # Convert financial_details_data to DataFrame for easier aggregation
     df_financial = pd.DataFrame(financial_details_data)
     df_financial['Subtotal_num'] = df_financial['Subtotal'].astype(float)
@@ -692,16 +680,16 @@ def generate_doordash_data(store_id, store_info, start_date, end_date):
         })
         payout_id_counter += 1
 
-    # Save to CSV
+    # Saving to CSV
     pd.DataFrame(financial_details_data).to_csv(f"doordash_financial_details_{store_id}.csv", index=False)
     pd.DataFrame(payout_summary_data).to_csv(f"doordash_payout_summary_{store_id}.csv", index=False)
     print(f"Finished DoorDash data for {store_info['name']}.")
 
 
-# In[12]:
 
 
-# --- Main Data Generation Loop ---
+# Generating Data Loop 
+
 if __name__ == "__main__":
     for store_id, store_info in STORE_LOCATIONS.items():
         # Generate Snackpass Data
@@ -718,14 +706,10 @@ if __name__ == "__main__":
     print("CSV files saved in the current directory.")
 
 
-# In[13]:
 
 
 import os
 print(os.getcwd())
-
-
-# In[ ]:
 
 
 
